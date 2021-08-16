@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use Illuminate\Support\Facades\Validator;
+use DB;
 
 class PostController extends Controller
 {
@@ -40,16 +41,37 @@ class PostController extends Controller
     }
 
 
+    public function searchMenu($search)
+    {
+        $find = Post::query()
+                    ->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('content', 'LIKE', "%{$search}%")
+                    ->get();
+
+        if($find) {
+            return response()->json(
+                [
+                    'success'   => true,
+                    'message'   => 'Search Data',
+                    'data'      => $find
+                ], 200
+            );
+        }
+    }
+
+
     public function save(Request $r)
     {
         $validator = Validator::make($r->all(),
             [
                 'title'     => 'required',
+                'image'     => 'required',
                 'content'   => 'required',
             ],
             [
-                'title.required' => 'Title can not be empty',
-                'content.required' => 'Content can not be empty',
+                'title.required'    => 'Title can not be empty',
+                'image.required'    => 'Image can not be empty',
+                'content.required'  => 'Content can not be empty',
             ]
         );
 
@@ -68,6 +90,7 @@ class PostController extends Controller
             $post = Post::create(
                 [
                     'title'     => $r->input('title'),
+                    'image'     => $r->input('image'),
                     'content'   => $r->input('content'),
                 ]
             );
@@ -96,12 +119,14 @@ class PostController extends Controller
     {
         $validator = Validator::make($r->all(),
             [
-                'title' => 'required',
-                'content' => 'required'
+                'title'     => 'required',
+                'image'     => 'required',
+                'content'   => 'required'
             ],
             [
-                'title.required'    => 'Title Cannot Be Empty',
-                'content.required'    => 'Content Cannot Be Empty'
+                'title.required'        => 'Title Cannot Be Empty',
+                'image.required'        => 'Image Cannot Be Empty',
+                'content.required'      => 'Content Cannot Be Empty'
             ]
         );
 
@@ -117,6 +142,7 @@ class PostController extends Controller
             $update = Post::whereId($r->input('id'))->update(
                 [
                     'title'     => $r->input('title'),
+                    'image'     => $r->input('image'),
                     'content'   => $r->input('content')
                 ]
             );
